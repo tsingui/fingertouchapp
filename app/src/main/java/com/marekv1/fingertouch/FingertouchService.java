@@ -305,6 +305,12 @@ public class FingertouchService extends Service implements Handler.Callback {
             startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
                     mNotificationBuilder.build());
 
+            if ( TaskerIntent.testStatus( this ).equals( TaskerIntent.Status.OK ) ) {
+                TaskerIntent i = new TaskerIntent( "Fingertouch Tile" );
+                i.addParameter( "started" );
+                sendBroadcast( i );
+            }
+
         } else if (intent.getAction().equals(Constants.ACTION.START_ACTION) && isServiceEnabled) {
             isServicePaused = false;
             mHandler.sendEmptyMessage(MSG_AUTH);
@@ -312,6 +318,11 @@ public class FingertouchService extends Service implements Handler.Callback {
                     .mActions.set(0,pauseAction);
             mNotificationManager.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
                     mNotificationBuilder.build());
+            if ( TaskerIntent.testStatus( this ).equals( TaskerIntent.Status.OK ) ) {
+                TaskerIntent i = new TaskerIntent( "Fingertouch Tile" );
+                i.addParameter( "resumed" );
+                sendBroadcast( i );
+            }
 
         } else if (intent.getAction().equals(Constants.ACTION.PAUSE_ACTION) && isServiceEnabled) {
             isServicePaused = true;
@@ -320,6 +331,11 @@ public class FingertouchService extends Service implements Handler.Callback {
                     .mActions.set(0,playAction);
             mNotificationManager.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
                     mNotificationBuilder.build());
+            if ( TaskerIntent.testStatus( this ).equals( TaskerIntent.Status.OK ) ) {
+                TaskerIntent i = new TaskerIntent( "Fingertouch Tile" );
+                i.addParameter( "paused" );
+                sendBroadcast( i );
+            }
 
         } else if (intent.getAction().equals(
                 Constants.ACTION.STOPFOREGROUND_ACTION) && isServiceEnabled) {
@@ -328,6 +344,11 @@ public class FingertouchService extends Service implements Handler.Callback {
             isServiceEnabled = false;
             isServicePaused = false;
             mHandler.sendEmptyMessage(MSG_CANCEL);
+            if ( TaskerIntent.testStatus( this ).equals( TaskerIntent.Status.OK ) ) {
+                TaskerIntent i = new TaskerIntent( "Fingertouch Tile" );
+                i.addParameter( "disabled" );
+                sendBroadcast( i );
+            }
 
             stopForeground(true);
             stopSelf();
@@ -340,6 +361,12 @@ public class FingertouchService extends Service implements Handler.Callback {
         super.onDestroy();
 //        Log.i(LOG_TAG, "In onDestroy");
         unregisterBroadcastReceiver();
+        if ( TaskerIntent.testStatus( this ).equals( TaskerIntent.Status.OK ) ) {
+            TaskerIntent i = new TaskerIntent( "Fingertouch Tile" );
+            i.addParameter( "disabled" );
+            sendBroadcast( i );
+        }
+
     }
 
     @Override

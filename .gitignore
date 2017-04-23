@@ -1,0 +1,8 @@
+# Created by .ignore support plugin (hsz.mobi)
+*.gradle
+*.apk
+*/build/
+/build/
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.marekv1.fingertouch"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="23"
+        android:targetSdkVersion="24" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/fingerprint_blue"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+
+        <activity
+            android:name="com.marekv1.fingertouch.MainActivity"
+            android:label="Fingertouch"
+            android:launchMode="singleTask" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name="com.marekv1.fingertouch.FingertouchService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.marekv1.fingertouch.action.startforeground" />
+                <action android:name="com.marekv1.fingertouch.action.stopforeground" />
+                <action android:name="com.marekv1.fingertouch.action.start" />
+                <action android:name="com.marekv1.fingertouch.action.pause" />
+            </intent-filter>
+        </service>
+
+    </application>
+
+</manifest>

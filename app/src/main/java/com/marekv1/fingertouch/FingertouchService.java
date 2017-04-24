@@ -259,8 +259,16 @@ public class FingertouchService extends Service implements Handler.Callback {
                 mSpass.initialize(FingertouchService.this);
             } catch (SsdkUnsupportedException e) {
                 Log.i(LOG_TAG, "Exception: " + e);
+                Toast.makeText(mContext, "Fingerprint Service is not supported on this device.",
+                        Toast.LENGTH_SHORT).show();
+                stopSelf();
+                return START_NOT_STICKY;
             } catch (UnsupportedOperationException e) {
                 Log.i(LOG_TAG, "Fingerprint Service is not supported in the device");
+                Toast.makeText(mContext, "Fingerprint Service is not supported on this device.",
+                        Toast.LENGTH_SHORT).show();
+                stopSelf();
+                return START_NOT_STICKY;
             }
             isFeatureEnabled_fingerprint = mSpass.isFeatureEnabled(Spass.DEVICE_FINGERPRINT);
 
@@ -270,7 +278,7 @@ public class FingertouchService extends Service implements Handler.Callback {
                 Log.i(LOG_TAG, "SDK version : " + mSpass.getVersionName());
             } else {
                 Log.i(LOG_TAG, "Fingerprint Service is not supported in the device.");
-                Toast.makeText(mContext, "Fingerprint Service is not supported in the device.",
+                Toast.makeText(mContext, "Fingerprint Service is not supported on this device.",
                         Toast.LENGTH_SHORT).show();
                 stopSelf();
                 return START_NOT_STICKY;

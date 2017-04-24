@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">Fingertouch</string>
+    <string name="tile_label">Fingertouch service</string>
     <string name="hello_world">Hello world!</string>
 
 </resources>

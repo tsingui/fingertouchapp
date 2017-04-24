@@ -3,11 +3,12 @@ package com.marekv1.fingertouch;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.service.quicksettings.TileService;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.content.BroadcastReceiver;
@@ -24,6 +25,7 @@ import com.samsung.android.sdk.pass.SpassInvalidStateException;
 
 public class FingertouchService extends Service implements Handler.Callback {
     private static final String LOG_TAG = "FingertouchService";
+    public static final String PREFS_NAME = "fingertouchSettings";
 
     private PowerManager pm;
     private SpassFingerprint mSpassFingerprint;
@@ -55,6 +57,8 @@ public class FingertouchService extends Service implements Handler.Callback {
     private Handler mHandler;
     private static final int MSG_AUTH = 1000;
     private static final int MSG_CANCEL = 1003;
+
+
 
     private BroadcastReceiver mPassReceiver = new BroadcastReceiver() {
         @Override
@@ -213,6 +217,27 @@ public class FingertouchService extends Service implements Handler.Callback {
         }
     }
 
+    private String getServiceStatus() {
+        String serviceStatus;
+        if (isServiceEnabled && !isServicePaused) {
+            serviceStatus = "running";
+        } else if (isServiceEnabled) {
+            serviceStatus = "paused";
+        } else {
+            serviceStatus = "disabled";
+        }
+        return serviceStatus;
+    }
+
+    private void notifyQStile() {
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("serviceStatus",getServiceStatus());
+        editor.commit();
+        TileService.requestListeningState(this,
+                new ComponentName(this,FingertouchTileService.class));
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -304,38 +329,27 @@ public class FingertouchService extends Service implements Handler.Callback {
                     mNotificationBuilder.build());
             startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
                     mNotificationBuilder.build());
+            notifyQStile();
 
-            if ( TaskerIntent.testStatus( this ).equals( TaskerIntent.Status.OK ) ) {
-                TaskerIntent i = new TaskerIntent( "Fingertouch Tile" );
-                i.addParameter( "started" );
-                sendBroadcast( i );
-            }
-
-        } else if (intent.getAction().equals(Constants.ACTION.START_ACTION) && isServiceEnabled) {
+        } else if (intent.getAction().equals(Constants.ACTION.START_ACTION) && isServiceEnabled
+                    && isServicePaused) {
             isServicePaused = false;
             mHandler.sendEmptyMessage(MSG_AUTH);
             mNotificationBuilder.setContentText("service is running")
                     .mActions.set(0,pauseAction);
             mNotificationManager.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
                     mNotificationBuilder.build());
-            if ( TaskerIntent.testStatus( this ).equals( TaskerIntent.Status.OK ) ) {
-                TaskerIntent i = new TaskerIntent( "Fingertouch Tile" );
-                i.addParameter( "resumed" );
-                sendBroadcast( i );
-            }
+            notifyQStile();
 
-        } else if (intent.getAction().equals(Constants.ACTION.PAUSE_ACTION) && isServiceEnabled) {
+        } else if (intent.getAction().equals(Constants.ACTION.PAUSE_ACTION) && isServiceEnabled
+                    && !isServicePaused) {
             isServicePaused = true;
             mHandler.sendEmptyMessage(MSG_CANCEL);
             mNotificationBuilder.setContentText("service is paused")
                     .mActions.set(0,playAction);
             mNotificationManager.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
                     mNotificationBuilder.build());
-            if ( TaskerIntent.testStatus( this ).equals( TaskerIntent.Status.OK ) ) {
-                TaskerIntent i = new TaskerIntent( "Fingertouch Tile" );
-                i.addParameter( "paused" );
-                sendBroadcast( i );
-            }
+            notifyQStile();
 
         } else if (intent.getAction().equals(
                 Constants.ACTION.STOPFOREGROUND_ACTION) && isServiceEnabled) {
@@ -344,11 +358,7 @@ public class FingertouchService extends Service implements Handler.Callback {
             isServiceEnabled = false;
             isServicePaused = false;
             mHandler.sendEmptyMessage(MSG_CANCEL);
-            if ( TaskerIntent.testStatus( this ).equals( TaskerIntent.Status.OK ) ) {
-                TaskerIntent i = new TaskerIntent( "Fingertouch Tile" );
-                i.addParameter( "disabled" );
-                sendBroadcast( i );
-            }
+            notifyQStile();
 
             stopForeground(true);
             stopSelf();
@@ -361,12 +371,9 @@ public class FingertouchService extends Service implements Handler.Callback {
         super.onDestroy();
 //        Log.i(LOG_TAG, "In onDestroy");
         unregisterBroadcastReceiver();
-        if ( TaskerIntent.testStatus( this ).equals( TaskerIntent.Status.OK ) ) {
-            TaskerIntent i = new TaskerIntent( "Fingertouch Tile" );
-            i.addParameter( "disabled" );
-            sendBroadcast( i );
-        }
-
+        isServiceEnabled = false;
+        isServicePaused = false;
+        notifyQStile();
     }
 
     @Override

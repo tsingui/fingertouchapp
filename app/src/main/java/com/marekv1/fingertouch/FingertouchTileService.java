@@ -20,7 +20,7 @@ public class FingertouchTileService extends TileService {
     //Called when the user adds this tile to Quick Settings.
     @Override
     public void onTileAdded() {
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        settings = getSharedPreferences(PREFS_NAME, 0);
         status = settings.getString("serviceStatus", "unknown");
         if (status.equals("running")) {
             this.getQsTile().setState(Tile.STATE_ACTIVE);
@@ -35,7 +35,7 @@ public class FingertouchTileService extends TileService {
     //Called each time tile is visible
     @Override
     public void onStartListening() {
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        settings = getSharedPreferences(PREFS_NAME, 0);
         status = settings.getString("serviceStatus", "unknown");
         if (status.equals("running")) {
             this.getQsTile().setState(Tile.STATE_ACTIVE);
@@ -56,7 +56,7 @@ public class FingertouchTileService extends TileService {
             baseIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
             startService(baseIntent);
 
-            SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+            settings = getSharedPreferences(PREFS_NAME, 0);
             status = settings.getString("serviceStatus", "unknown");
             if (status.equals("running")) {
                 Intent intent = new Intent(this, FingertouchService.class);

@@ -8,7 +8,14 @@ import android.service.quicksettings.TileService;
 
 public class FingertouchTileService extends TileService {
     public static final String PREFS_NAME = "fingertouchSettings";
+    private SharedPreferences settings;
     private String status;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        settings=this.getSharedPreferences(PREFS_NAME, 0);
+    }
 
     //Called when the user adds this tile to Quick Settings.
     @Override

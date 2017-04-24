@@ -1,6 +1,7 @@
 package com.marekv1.fingertouch;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -8,10 +9,13 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity implements OnClickListener {
+    public static final String PREFS_NAME = "fingertouchSettings";
+    private SharedPreferences settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        settings=this.getSharedPreferences(PREFS_NAME, 0);
         setContentView(R.layout.activity_main);
         Button startButton = (Button) findViewById(R.id.button1);
         Button stopButton = (Button) findViewById(R.id.button2);

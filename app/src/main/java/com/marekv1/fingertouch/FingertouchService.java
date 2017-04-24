@@ -26,6 +26,7 @@ import com.samsung.android.sdk.pass.SpassInvalidStateException;
 public class FingertouchService extends Service implements Handler.Callback {
     private static final String LOG_TAG = "FingertouchService";
     public static final String PREFS_NAME = "fingertouchSettings";
+    private SharedPreferences settings;
 
     private PowerManager pm;
     private SpassFingerprint mSpassFingerprint;
@@ -230,7 +231,7 @@ public class FingertouchService extends Service implements Handler.Callback {
     }
 
     private void notifyQStile() {
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        settings = getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString("serviceStatus",getServiceStatus());
         editor.commit();
@@ -241,6 +242,7 @@ public class FingertouchService extends Service implements Handler.Callback {
     @Override
     public void onCreate() {
         super.onCreate();
+        settings=this.getSharedPreferences(PREFS_NAME, 0);
     }
 
     @Override

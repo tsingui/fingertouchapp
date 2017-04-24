@@ -22,14 +22,17 @@ public class FingertouchTileService extends TileService {
     public void onTileAdded() {
         settings = getSharedPreferences(PREFS_NAME, 0);
         status = settings.getString("serviceStatus", "unknown");
+        int state;
         if (status.equals("running")) {
-            this.getQsTile().setState(Tile.STATE_ACTIVE);
-        } else if (status.equals("paused") || status.equals("disabled")) {
-            this.getQsTile().setState(Tile.STATE_INACTIVE);
+            state = Tile.STATE_ACTIVE;
         } else {
-            this.getQsTile().setState(Tile.STATE_UNAVAILABLE);
+            state = Tile.STATE_INACTIVE;
         }
-        this.getQsTile().updateTile();
+        try {
+            getQsTile().setState(state);
+            getQsTile().updateTile();
+        } catch (Exception ignored) {
+        }
     }
 
     //Called each time tile is visible
@@ -37,14 +40,17 @@ public class FingertouchTileService extends TileService {
     public void onStartListening() {
         settings = getSharedPreferences(PREFS_NAME, 0);
         status = settings.getString("serviceStatus", "unknown");
+        int state;
         if (status.equals("running")) {
-            this.getQsTile().setState(Tile.STATE_ACTIVE);
-        } else if (status.equals("paused") || status.equals("disabled")) {
-            this.getQsTile().setState(Tile.STATE_INACTIVE);
+            state = Tile.STATE_ACTIVE;
         } else {
-            this.getQsTile().setState(Tile.STATE_UNAVAILABLE);
+            state = Tile.STATE_INACTIVE;
         }
-        this.getQsTile().updateTile();
+        try {
+            getQsTile().setState(state);
+            getQsTile().updateTile();
+        } catch (Exception ignored) {
+        }
     }
 
     //Called when the user clicks on this tile.

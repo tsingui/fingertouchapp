@@ -93,9 +93,9 @@ public class FingertouchService extends Service implements Handler.Callback {
     private SpassFingerprint.IdentifyListener mIdentifyListener = new SpassFingerprint.IdentifyListener() {
         @Override
         public void onFinished(int eventStatus) {
-            eventStatusName = getEventStatusName(eventStatus);
+//            eventStatusName = getEventStatusName(eventStatus);
 //            Log.i(LOG_TAG, "identify finished : reason =" + eventStatusName);
-
+/*
             if (eventStatus == SpassFingerprint.STATUS_AUTHENTIFICATION_SUCCESS) {
 //                Log.i(LOG_TAG, "onFinished() : Identify authentification Success");
             } else if (eventStatus == SpassFingerprint.STATUS_AUTHENTIFICATION_PASSWORD_SUCCESS) {
@@ -113,7 +113,7 @@ public class FingertouchService extends Service implements Handler.Callback {
             } else {
 //                Log.i(LOG_TAG, "onFinished() : Authentification Fail for identify, reason = " + eventStatusName);
             }
-
+*/
             onReadyIdentify = false;
             mHandler.sendEmptyMessageDelayed(MSG_AUTH, 100);
         }
@@ -190,12 +190,6 @@ public class FingertouchService extends Service implements Handler.Callback {
                 if (mSpassFingerprint != null) {
                     mSpassFingerprint.startIdentify(mIdentifyListener);
                 }
-            } catch (SpassInvalidStateException ise) {
-                onReadyIdentify = false;
-                if (ise.getType() == SpassInvalidStateException.STATUS_OPERATION_DENIED) {
-//                    Log.i(LOG_TAG, "Exception: " + ise.getMessage());
-                }
-                mHandler.sendEmptyMessageDelayed(MSG_AUTH, 1000);
             } catch (IllegalStateException e) {
                 onReadyIdentify = false;
 //                Log.i(LOG_TAG, "Exception: " + e);

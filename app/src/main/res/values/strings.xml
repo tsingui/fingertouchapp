@@ -3,7 +3,7 @@
 
     <string name="app_name">Fingertouch</string>
     <string name="tile_label">Fingertouch service</string>
-    <string name="app_description">This app allows you to use your hardware HOME button with integrated fingerprint sensor on Samsung Galaxy devices (Android 7.0+) as a capacitive HOME button. You can use Quick Settings Tile to toggle the service on/off if needed, use it to temporary disable the service if you need to use fingerprint authentication in any app.\n\nBefore adding quick settings tile to the notification bar, please open the app and run the service first.\n\nService runs in foreground and monitors touches on the fingerprint sensor. When touch is detected, it works like pressing the HOME button physically. Service is paused when screen is off and has no battery impact. This app uses Samsung fingerprint SDK.</string>
+    <string name="app_description">This app allows you to use your hardware HOME button with integrated fingerprint sensor on Samsung Galaxy devices (Android 7.0+) as a capacitive HOME button.\n\nApp service runs in foreground and monitors touches of the fingerprint sensor. When touch is detected, it works like pressing the HOME button physically. The service is paused when screen is off and has no battery impact. This app uses Samsung fingerprint SDK.\n\nYou can also use Quick Settings Tile (Android 7+ feature) to quickly toggle the service on/off if needed - use it to temporary disable the service in case you need to authenticate with your fingerprint in any app. Before adding quick settings tile to the notification bar, please open the app and run the service first.</string>
     <string name="start_button">Start Fingertouch Service</string>
     <string name="stop_button">Stop Fingertouch Service</string>
 

@@ -7,6 +7,7 @@ public class Constants {
 		public static String PAUSE_ACTION = "com.marekv1.fingertouch.action.pause";
 		public static String STARTFOREGROUND_ACTION = "com.marekv1.fingertouch.action.startforeground";
 		public static String STOPFOREGROUND_ACTION = "com.marekv1.fingertouch.action.stopforeground";
+		public static String UPDATE_STATUS = "com.marekv1.fingertouch.action.updatestatus";
 	}
 
 	public interface NOTIFICATION_ID {

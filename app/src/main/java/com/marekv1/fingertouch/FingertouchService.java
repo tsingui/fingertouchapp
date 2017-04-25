@@ -78,7 +78,7 @@ public class FingertouchService extends Service implements Handler.Callback {
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         mContext.registerReceiver(mPassReceiver, filter);
-    };
+    }
 
     private void unregisterBroadcastReceiver() {
         try {
@@ -231,7 +231,9 @@ public class FingertouchService extends Service implements Handler.Callback {
     }
 
     private void notifyQStile() {
-        settings = getSharedPreferences(PREFS_NAME, 0);
+        if (settings == null) {
+            settings = this.getSharedPreferences(PREFS_NAME, 0);
+        }
         SharedPreferences.Editor editor = settings.edit();
         editor.putString("serviceStatus",getServiceStatus());
         editor.commit();
@@ -242,12 +244,19 @@ public class FingertouchService extends Service implements Handler.Callback {
     @Override
     public void onCreate() {
         super.onCreate();
-        settings=this.getSharedPreferences(PREFS_NAME, 0);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent.getAction().equals(Constants.ACTION.STARTFOREGROUND_ACTION) && !isServiceEnabled) {
+        if (intent.getAction().equals(Constants.ACTION.UPDATE_STATUS)) {
+            if (settings == null) {
+                settings = this.getSharedPreferences(PREFS_NAME, 0);
+            }
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("serviceStatus",getServiceStatus());
+            editor.commit();
+
+        } else if (intent.getAction().equals(Constants.ACTION.STARTFOREGROUND_ACTION) && !isServiceEnabled) {
 //            Log.i(LOG_TAG, "Received Start Fingertouch Intent ");
 
             pm = (PowerManager) getSystemService(Context.POWER_SERVICE);

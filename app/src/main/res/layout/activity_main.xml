@@ -5,7 +5,7 @@
                 tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/appDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/app_description"
@@ -17,19 +17,19 @@
         android:layout_alignParentStart="true" />
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/startForeground"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView1"
+        android:layout_below="@+id/appDescription"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"
         android:text="@string/start_button"/>
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/stopForeground"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/button1"
+        android:layout_below="@+id/startForeground"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"
         android:text="@string/stop_button"/>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.marekv1.fingertouch"
-    android:versionCode="5"
-    android:versionName="1.2.2" >
+    android:versionCode="6"
+    android:versionName="1.2.3" >
 
     <uses-sdk
         android:minSdkVersion="24"
         android:targetSdkVersion="24" />
 
-    <uses-permission android:name="net.dinglisch.android.tasker.PERMISSION_RUN_TASKS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="false"
@@ -16,14 +16,33 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
+        <receiver
+            android:name="com.marekv1.fingertouch.StartFingertouchServiceAtBoot"
+            android:label="StartFingertouchServiceAtBoot">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name="com.marekv1.fingertouch.MainActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.marekv1.fingertouch.Settings.SettingsActivity"
+            android:label="@string/settings_name"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.marekv1.fingertouch.MainActivity" />
         </activity>
 
         <service
@@ -38,7 +57,7 @@
         </service>
 
         <service
-            android:name=".FingertouchTileService"
+            android:name="com.marekv1.fingertouch.CustomTile.FingertouchTileService"
             android:label="@string/tile_label"
             android:icon="@drawable/fingerprint_tile"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">

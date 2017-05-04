@@ -1,9 +1,12 @@
-package com.marekv1.fingertouch;
+package com.marekv1.fingertouch.CustomTile;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
+
+import com.marekv1.fingertouch.Constants;
+import com.marekv1.fingertouch.FingertouchService;
 
 
 public class FingertouchTileService extends TileService {

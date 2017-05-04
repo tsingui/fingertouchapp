@@ -2,9 +2,33 @@
 <resources>
 
     <string name="app_name">Fingertouch</string>
+    <string name="about_title">Fingertouch - version</string>
     <string name="tile_label">Fingertouch service</string>
     <string name="app_description">This app allows you to use your hardware HOME button with integrated fingerprint sensor on Samsung Galaxy devices (Android 7.0+) as a capacitive HOME button.\n\nApp service runs in foreground and monitors touches of the fingerprint sensor. When touch is detected, it works like pressing the HOME button physically. The service is paused when screen is off and has no battery impact. This app uses Samsung fingerprint SDK.\n\nYou can also use Quick Settings Tile (Android 7+ feature) to quickly toggle the service on/off if needed - use it to temporary disable the service in case you need to authenticate with your fingerprint in any app. Before adding quick settings tile to the notification bar, please open the app and run the service first.</string>
     <string name="start_button">Start Fingertouch Service</string>
     <string name="stop_button">Stop Fingertouch Service</string>
+    <string name="startOnBootHeader">Start on boot:</string>
+    <string name="bootDescription">Enable this option to automatically start the Fingertouch service after device restart.</string>
+    <string name="touch_delay_header">Touch delay (ms):</string>
+    <string name="delay_description">Define the minimum delay between consequent touches. Value above 500ms may help if you use the \'double tap\' camera feature.</string>
+    <string name="settings_name">Fingertouch Settings</string>
+    <string name="settings">Settings</string>
+
+    <string-array name="delay_arrays">
+        <item>100</item>
+        <item>200</item>
+        <item>300</item>
+        <item>400</item>
+        <item>500</item>
+        <item>600</item>
+        <item>700</item>
+        <item>800</item>
+        <item>900</item>
+        <item>1000</item>
+    </string-array>
+
+    <string name="about_desc">Turn your fingerprint sensor into capacitive HOME button - designed for Samsung Galaxy S7 / S7 Edge.</string>
+    <string name="action_about">About</string>
+
 
 </resources>

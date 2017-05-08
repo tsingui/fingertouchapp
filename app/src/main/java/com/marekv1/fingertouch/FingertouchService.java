@@ -46,6 +46,8 @@ public class FingertouchService extends Service implements Handler.Callback {
 
     private int delay = 100;
 
+    private boolean hasRegisteredFinger = false;
+
     private final BroadcastReceiver mPassReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -280,6 +282,23 @@ public class FingertouchService extends Service implements Handler.Callback {
                 Log.i(Constants.PREFS.LOG_TAG, "Fingerprint Service is not supported in the device.");
                 Toast.makeText(mContext, "Fingerprint Service is not supported on this device.",
                         Toast.LENGTH_SHORT).show();
+                stopSelf();
+                return START_NOT_STICKY;
+            }
+
+            try {
+                hasRegisteredFinger = mSpassFingerprint.hasRegisteredFinger();
+            } catch (UnsupportedOperationException e) {
+                Log.i(Constants.PREFS.LOG_TAG, "Fingerprint Service is not supported in the device.");
+                Toast.makeText(mContext, "Fingerprint Service is not supported on this device.",
+                        Toast.LENGTH_SHORT).show();
+                stopSelf();
+                return START_NOT_STICKY;
+            }
+            if (!hasRegisteredFinger) {
+                Log.i(Constants.PREFS.LOG_TAG, "Please register at least one fingerprint in the device");
+                Toast.makeText(mContext, "Please register at least one fingerprint in the device",
+                        Toast.LENGTH_LONG).show();
                 stopSelf();
                 return START_NOT_STICKY;
             }

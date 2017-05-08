@@ -116,6 +116,7 @@ public class FingertouchService extends Service implements Handler.Callback {
             intent.addCategory("android.intent.category.HOME");
             intent.setFlags(268435456);
             mContext.startActivity(intent);
+            mContext.sendBroadcast(new Intent("android.intent.action.CLOSE_SYSTEM_DIALOGS"));
 
             try {
                 mSpassFingerprint.cancelIdentify();

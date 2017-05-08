@@ -10,7 +10,7 @@
     <string name="startOnBootHeader">Start on boot:</string>
     <string name="bootDescription">Enable this option to automatically start the Fingertouch service after device restart.</string>
     <string name="touch_delay_header">Touch delay (ms):</string>
-    <string name="delay_description">Define the minimum delay between consequent touches. Value above 500ms may help if you use the \'double tap\' camera feature.</string>
+    <string name="delay_description">Define the minimum delay between consecutive touches. Value above 500ms may help if you use the \'double tap\' camera feature.</string>
     <string name="settings_name">Fingertouch Settings</string>
     <string name="settings">Settings</string>
 

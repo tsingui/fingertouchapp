@@ -239,6 +239,19 @@ public class FingertouchService extends Service implements Handler.Callback {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null) {
+            intent = new Intent();
+            if (settings == null) {
+                settings = this.getSharedPreferences(Constants.PREFS.PREFS_NAME, 0);
+            }
+            String status = settings.getString("serviceStatus", "unknown");
+            if (status.equals("running")) {
+                intent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+            }
+        }
+        if (intent.getAction() == null) {
+            intent.setAction("none");
+        }
         if (intent.getAction().equals(Constants.ACTION.UPDATE_STATUS)) {
             if (settings == null) {
                 settings = this.getSharedPreferences(Constants.PREFS.PREFS_NAME, 0);

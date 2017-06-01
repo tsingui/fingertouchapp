@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         builder.setPositiveButton("GET PRO", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 try {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.marekv1.fingertouch")));
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.marekv1.fingertouchpro")));
                 } catch (android.content.ActivityNotFoundException anfe) {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.marekv1.fingertouchpro")));
                 }

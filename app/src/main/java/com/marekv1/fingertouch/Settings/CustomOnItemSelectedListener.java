@@ -22,7 +22,7 @@ class CustomOnItemSelectedListener implements OnItemSelectedListener {
         editor.commit();
 
         Intent updateDelay = new Intent(parent.getContext(), FingertouchService.class);
-        updateDelay.setAction(Constants.ACTION.UPDATE_DELAY);
+        updateDelay.setAction(Constants.ACTION.UPDATE_SETTINGS);
         parent.getContext().startService(updateDelay);
     }
 

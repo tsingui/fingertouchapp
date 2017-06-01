@@ -8,7 +8,7 @@ public class Constants {
 		String STARTFOREGROUND_ACTION = "com.marekv1.fingertouch.action.startforeground";
 		String STOPFOREGROUND_ACTION = "com.marekv1.fingertouch.action.stopforeground";
 		String UPDATE_STATUS = "com.marekv1.fingertouch.action.updatestatus";
-        String UPDATE_DELAY = "com.marekv1.fingertouch.action.updatedelay";
+        String UPDATE_SETTINGS = "com.marekv1.fingertouch.action.updatesettings";
 	}
 
 	public interface PREFS {

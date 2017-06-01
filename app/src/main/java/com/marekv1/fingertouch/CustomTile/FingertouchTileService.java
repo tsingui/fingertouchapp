@@ -10,7 +10,7 @@ import com.marekv1.fingertouch.FingertouchService;
 
 
 public class FingertouchTileService extends TileService {
-    public static final String PREFS_NAME = "fingertouchSettings";
+    private static final String PREFS_NAME = "fingertouchSettings";
     private SharedPreferences settings;
     private String status;
 

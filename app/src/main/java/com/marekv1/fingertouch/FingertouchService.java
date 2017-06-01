@@ -28,6 +28,7 @@ public class FingertouchService extends Service implements Handler.Callback {
 
     private PowerManager pm;
     private SpassFingerprint mSpassFingerprint;
+    private long mSpassCreated = 0;
     private Context mContext;
     private String eventStatusName;
 
@@ -43,19 +44,30 @@ public class FingertouchService extends Service implements Handler.Callback {
     private Handler mHandler;
     private static final int MSG_AUTH = 1000;
     private static final int MSG_CANCEL = 1003;
+    private static final int MSG_PAUSE = 1005;
+    private static final int MSG_RESUME = 1006;
 
     private int delay = 100;
-
-    private boolean hasRegisteredFinger = false;
+    private Intent homeIntent;
 
     private final BroadcastReceiver mPassReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (Intent.ACTION_SCREEN_ON.equals(action)) {
-                mHandler.sendEmptyMessageDelayed(MSG_AUTH, delay);
+                mHandler.removeCallbacksAndMessages(this);
+                long timeElapsed = (System.currentTimeMillis() - mSpassCreated) / 1000;
+                if (timeElapsed > 3600) { // re-initialize every hour
+                    try {
+                        mSpassFingerprint = new SpassFingerprint(FingertouchService.this);
+                        mSpassCreated = System.currentTimeMillis();
+                    } catch (Exception ignored) {
+                    }
+                }
+                mHandler.sendEmptyMessageDelayed(MSG_RESUME, 500);
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                mHandler.sendEmptyMessageDelayed(MSG_CANCEL, delay);
+                mHandler.removeCallbacksAndMessages(this);
+                mHandler.sendEmptyMessageDelayed(MSG_PAUSE, 500);
             }
         }
     };
@@ -112,10 +124,7 @@ public class FingertouchService extends Service implements Handler.Callback {
 
         @Override
         public void onStarted() {
-            Intent intent = new Intent("android.intent.action.MAIN");
-            intent.addCategory("android.intent.category.HOME");
-            intent.setFlags(268435456);
-            mContext.startActivity(intent);
+            mContext.startActivity(homeIntent);
             mContext.sendBroadcast(new Intent("android.intent.action.CLOSE_SYSTEM_DIALOGS"));
 
             try {
@@ -167,6 +176,12 @@ public class FingertouchService extends Service implements Handler.Callback {
             case MSG_CANCEL:
                 cancelIdentify();
                 break;
+            case MSG_PAUSE:
+                pauseService(false);
+                break;
+            case MSG_RESUME:
+                resumeService(false);
+                break;
         }
         return true;
     }
@@ -176,6 +191,10 @@ public class FingertouchService extends Service implements Handler.Callback {
             try {
                 onReadyIdentify = true;
                 if (mSpassFingerprint != null) {
+                    mSpassFingerprint.startIdentify(mIdentifyListener);
+                } else {
+                    mSpassFingerprint = new SpassFingerprint(FingertouchService.this);
+                    mSpassCreated = System.currentTimeMillis();
                     mSpassFingerprint.startIdentify(mIdentifyListener);
                 }
             } catch (IllegalStateException e) {
@@ -188,6 +207,7 @@ public class FingertouchService extends Service implements Handler.Callback {
 
     private void cancelIdentify() {
         if (onReadyIdentify) {
+            onReadyIdentify = false;
             try {
                 if (mSpassFingerprint != null) {
                     mSpassFingerprint.cancelIdentify();
@@ -196,7 +216,6 @@ public class FingertouchService extends Service implements Handler.Callback {
             } catch (IllegalStateException ise) {
 //                Log.i(Constants.PREFS.LOG_TAG, ise.getMessage());
             }
-            onReadyIdentify = false;
         }
     }
 
@@ -216,9 +235,7 @@ public class FingertouchService extends Service implements Handler.Callback {
         if (settings == null) {
             settings = this.getSharedPreferences(Constants.PREFS.PREFS_NAME, 0);
         }
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("serviceStatus",getServiceStatus());
-        editor.commit();
+        settings.edit().putString("serviceStatus",getServiceStatus()).commit();
         TileService.requestListeningState(this,
                 new ComponentName(this,FingertouchTileService.class));
     }
@@ -249,160 +266,182 @@ public class FingertouchService extends Service implements Handler.Callback {
                 intent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
             }
         }
-        if (intent.getAction() == null) {
-            intent.setAction("none");
-        }
-        if (intent.getAction().equals(Constants.ACTION.UPDATE_STATUS)) {
-            if (settings == null) {
-                settings = this.getSharedPreferences(Constants.PREFS.PREFS_NAME, 0);
-            }
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putString("serviceStatus",getServiceStatus());
-            editor.commit();
 
-        } else if (isServiceEnabled && intent.getAction().equals(Constants.ACTION.UPDATE_DELAY)) {
-            updateDelay();
-
-        } else if (intent.getAction().equals(Constants.ACTION.STARTFOREGROUND_ACTION) && !isServiceEnabled) {
-//            Log.i(Constants.PREFS.LOG_TAG, "Received Start Fingertouch Intent ");
-
-            pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            mContext = this;
-            mHandler = new Handler(this);
-            Spass mSpass = new Spass();
-
-            try {
-                mSpass.initialize(FingertouchService.this);
-            } catch (SsdkUnsupportedException e) {
-                Log.i(Constants.PREFS.LOG_TAG, "Exception: " + e);
-                Toast.makeText(mContext, "Fingerprint Service is not supported on this device.",
-                        Toast.LENGTH_SHORT).show();
-                stopSelf();
-                return START_NOT_STICKY;
-            } catch (UnsupportedOperationException e) {
-                Log.i(Constants.PREFS.LOG_TAG, "Fingerprint Service is not supported in the device");
-                Toast.makeText(mContext, "Fingerprint Service is not supported on this device.",
-                        Toast.LENGTH_SHORT).show();
-                stopSelf();
-                return START_NOT_STICKY;
-            }
-            boolean isFeatureEnabled_fingerprint = mSpass.isFeatureEnabled(Spass.DEVICE_FINGERPRINT);
-
-            if (isFeatureEnabled_fingerprint) {
-                mSpassFingerprint = new SpassFingerprint(FingertouchService.this);
-                Log.i(Constants.PREFS.LOG_TAG, "Fingerprint Service is supported in the device.");
-                Log.i(Constants.PREFS.LOG_TAG, "SDK version : " + mSpass.getVersionName());
-            } else {
-                Log.i(Constants.PREFS.LOG_TAG, "Fingerprint Service is not supported in the device.");
-                Toast.makeText(mContext, "Fingerprint Service is not supported on this device.",
-                        Toast.LENGTH_SHORT).show();
-                stopSelf();
-                return START_NOT_STICKY;
+        if (intent != null) {
+            if (intent.getAction() == null) {
+                intent.setAction("none");
             }
 
-            try {
-                hasRegisteredFinger = mSpassFingerprint.hasRegisteredFinger();
-            } catch (UnsupportedOperationException e) {
-                Log.i(Constants.PREFS.LOG_TAG, "Fingerprint Service is not supported in the device.");
-                Toast.makeText(mContext, "Fingerprint Service is not supported on this device.",
-                        Toast.LENGTH_SHORT).show();
+            if (Constants.ACTION.UPDATE_STATUS.equals(intent.getAction())) {
+                if (settings == null) {
+                    settings = this.getSharedPreferences(Constants.PREFS.PREFS_NAME, 0);
+                }
+                settings.edit().putString("serviceStatus", getServiceStatus()).commit();
+
+            } else if (isServiceEnabled && Constants.ACTION.UPDATE_SETTINGS.equals(intent.getAction())) {
+                updateDelay();
+
+            } else if (!isServiceEnabled && Constants.ACTION.STARTFOREGROUND_ACTION.equals(intent.getAction())) {
+
+                mContext = this;
+                mHandler = new Handler(this);
+                Spass mSpass = new Spass();
+
+                try {
+                    mSpass.initialize(FingertouchService.this);
+                } catch (SsdkUnsupportedException e) {
+                    Log.i(Constants.PREFS.LOG_TAG, "Exception: " + e);
+                    Toast.makeText(mContext, "Fingerprint Service is not supported on this device.",
+                            Toast.LENGTH_SHORT).show();
+                    stopSelf();
+                    return START_NOT_STICKY;
+                } catch (UnsupportedOperationException e) {
+                    Log.i(Constants.PREFS.LOG_TAG, "Fingerprint Service is not supported in the device");
+                    Toast.makeText(mContext, "Fingerprint Service is not supported on this device.",
+                            Toast.LENGTH_SHORT).show();
+                    stopSelf();
+                    return START_NOT_STICKY;
+                }
+                boolean isFeatureEnabled_fingerprint = mSpass.isFeatureEnabled(Spass.DEVICE_FINGERPRINT);
+
+                if (isFeatureEnabled_fingerprint) {
+                    mSpassFingerprint = new SpassFingerprint(FingertouchService.this);
+                    Log.i(Constants.PREFS.LOG_TAG, "Fingerprint Service is supported in the device.");
+                    Log.i(Constants.PREFS.LOG_TAG, "SDK version : " + mSpass.getVersionName());
+                } else {
+                    Log.i(Constants.PREFS.LOG_TAG, "Fingerprint Service is not supported in the device.");
+                    Toast.makeText(mContext, "Fingerprint Service is not supported on this device.",
+                            Toast.LENGTH_SHORT).show();
+                    stopSelf();
+                    return START_NOT_STICKY;
+                }
+
+                boolean hasRegisteredFinger;
+                try {
+                    hasRegisteredFinger = mSpassFingerprint.hasRegisteredFinger();
+                } catch (UnsupportedOperationException e) {
+                    Log.i(Constants.PREFS.LOG_TAG, "Fingerprint Service is not supported in the device.");
+                    Toast.makeText(mContext, "Fingerprint Service is not supported on this device.",
+                            Toast.LENGTH_SHORT).show();
+                    stopSelf();
+                    return START_NOT_STICKY;
+                }
+                if (!hasRegisteredFinger) {
+                    Log.i(Constants.PREFS.LOG_TAG, "Please register at least one fingerprint in the device");
+                    Toast.makeText(mContext, "Please register at least one fingerprint in the device",
+                            Toast.LENGTH_LONG).show();
+                    stopSelf();
+                    return START_NOT_STICKY;
+                }
+
+                startService();
+
+            } else if (isServiceEnabled && isServicePaused
+                        && Constants.ACTION.START_ACTION.equals(intent.getAction())) {
+                resumeService(true);
+
+            } else if (isServiceEnabled && !isServicePaused
+                        && Constants.ACTION.PAUSE_ACTION.equals(intent.getAction())) {
+                pauseService(true);
+
+            } else if (isServiceEnabled && Constants.ACTION.STOPFOREGROUND_ACTION.equals(intent.getAction())) {
+
+                isServiceEnabled = false;
+                isServicePaused = false;
+                mHandler.sendEmptyMessage(MSG_CANCEL);
+                notifyQStile();
+
+                stopForeground(true);
                 stopSelf();
                 return START_NOT_STICKY;
             }
-            if (!hasRegisteredFinger) {
-                Log.i(Constants.PREFS.LOG_TAG, "Please register at least one fingerprint in the device");
-                Toast.makeText(mContext, "Please register at least one fingerprint in the device",
-                        Toast.LENGTH_LONG).show();
-                stopSelf();
-                return START_NOT_STICKY;
-            }
-
-            registerBroadcastReceiver();
-            updateDelay();
-
-            isServiceEnabled = true;
-            isServicePaused = false;
-            mHandler.sendEmptyMessage(MSG_AUTH);
-
-
-
-            Intent notificationIntent = new Intent(this, MainActivity.class);
-            notificationIntent.setAction(Constants.ACTION.MAIN_ACTION);
-            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                    notificationIntent, 0);
-
-            Intent playIntent = new Intent(this, FingertouchService.class);
-            playIntent.setAction(Constants.ACTION.START_ACTION);
-            PendingIntent pplayIntent = PendingIntent.getService(this, 0,
-                    playIntent, 0);
-            playAction = new NotificationCompat.Action(
-                    android.R.drawable.ic_media_play, "Resume", pplayIntent);
-
-            Intent pauseIntent = new Intent(this, FingertouchService.class);
-            pauseIntent.setAction(Constants.ACTION.PAUSE_ACTION);
-            PendingIntent ppauseIntent = PendingIntent.getService(this, 0,
-                    pauseIntent, 0);
-            pauseAction = new NotificationCompat.Action(
-                    android.R.drawable.ic_media_pause, "Pause", ppauseIntent);
-
-            Intent disableIntent = new Intent(this, FingertouchService.class);
-            disableIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
-            PendingIntent pdisableIntent = PendingIntent.getService(this, 0,
-                    disableIntent, 0);
-
-            mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            mNotificationBuilder = new NotificationCompat.Builder(this)
-                    .setContentTitle("Fingertouch Service")
-                    .setTicker("Fingertouch Service")
-                    .setContentText("service is running")
-                    .setSmallIcon(R.drawable.fingerprint_black)
-                    .setContentIntent(pendingIntent)
-                    .setOngoing(true)
-                    .addAction(pauseAction)
-                    .addAction(android.R.drawable.ic_notification_clear_all, "DISABLE", pdisableIntent);
-
-            mNotificationManager.notify(
-                    Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
-                    mNotificationBuilder.build());
-            startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
-                    mNotificationBuilder.build());
-            notifyQStile();
-
-        } else if (intent.getAction().equals(Constants.ACTION.START_ACTION) && isServiceEnabled
-                    && isServicePaused) {
-            isServicePaused = false;
-            mHandler.sendEmptyMessage(MSG_AUTH);
-            mNotificationBuilder.setContentText("service is running")
-                    .mActions.set(0,pauseAction);
-            mNotificationManager.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
-                    mNotificationBuilder.build());
-            notifyQStile();
-
-        } else if (intent.getAction().equals(Constants.ACTION.PAUSE_ACTION) && isServiceEnabled
-                    && !isServicePaused) {
-            isServicePaused = true;
-            mHandler.sendEmptyMessage(MSG_CANCEL);
-            mNotificationBuilder.setContentText("service is paused")
-                    .mActions.set(0,playAction);
-            mNotificationManager.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
-                    mNotificationBuilder.build());
-            notifyQStile();
-
-        } else if (intent.getAction().equals(
-                Constants.ACTION.STOPFOREGROUND_ACTION) && isServiceEnabled) {
-//            Log.i(Constants.PREFS.LOG_TAG, "Received Stop Fingertouch Intent");
-
-            isServiceEnabled = false;
-            isServicePaused = false;
-            mHandler.sendEmptyMessage(MSG_CANCEL);
-            notifyQStile();
-
-            stopForeground(true);
-            stopSelf();
         }
         return START_STICKY;
+    }
+
+    private void startService() {
+        mSpassCreated = System.currentTimeMillis();
+        pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        //Get settings
+        updateDelay();
+
+        homeIntent = new Intent("android.intent.action.MAIN");
+        homeIntent.addCategory("android.intent.category.HOME");
+        homeIntent.setFlags(268435456);
+
+        isServiceEnabled = true;
+        isServicePaused = false;
+        mHandler.sendEmptyMessage(MSG_AUTH);
+
+        registerBroadcastReceiver();
+
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        notificationIntent.setAction(Constants.ACTION.MAIN_ACTION);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                notificationIntent, 0);
+
+        Intent playIntent = new Intent(this, FingertouchService.class);
+        playIntent.setAction(Constants.ACTION.START_ACTION);
+        PendingIntent pplayIntent = PendingIntent.getService(this, 0,
+                playIntent, 0);
+        playAction = new NotificationCompat.Action(
+                android.R.drawable.ic_media_play, "Resume", pplayIntent);
+
+        Intent pauseIntent = new Intent(this, FingertouchService.class);
+        pauseIntent.setAction(Constants.ACTION.PAUSE_ACTION);
+        PendingIntent ppauseIntent = PendingIntent.getService(this, 0,
+                pauseIntent, 0);
+        pauseAction = new NotificationCompat.Action(
+                android.R.drawable.ic_media_pause, "Pause", ppauseIntent);
+
+        Intent disableIntent = new Intent(this, FingertouchService.class);
+        disableIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
+        PendingIntent pdisableIntent = PendingIntent.getService(this, 0,
+                disableIntent, 0);
+
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationBuilder = new NotificationCompat.Builder(this)
+                .setContentTitle("Fingertouch Service")
+                .setTicker("Fingertouch Service")
+                .setContentText("service is running")
+                .setSmallIcon(R.drawable.fingerprint_black)
+                .setContentIntent(pendingIntent)
+                .setOngoing(true)
+                .addAction(pauseAction)
+                .addAction(android.R.drawable.ic_notification_clear_all, "DISABLE", pdisableIntent);
+
+//        mNotificationManager.notify(
+//                Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
+//                mNotificationBuilder.build());
+        startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
+                mNotificationBuilder.build());
+        notifyQStile();
+    }
+
+    private void pauseService(boolean notify) {
+        isServicePaused = true;
+        mHandler.sendEmptyMessage(MSG_CANCEL);
+        mNotificationBuilder.setContentText("service is paused")
+                .mActions.set(0,playAction);
+        mNotificationManager.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
+                mNotificationBuilder.build());
+        if (notify) {
+            notifyQStile();
+        }
+    }
+
+    private void resumeService(boolean notify) {
+        isServicePaused = false;
+        mHandler.sendEmptyMessage(MSG_AUTH);
+        mNotificationBuilder.setContentText("service is running")
+                .mActions.set(0,pauseAction);
+        mNotificationManager.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
+                mNotificationBuilder.build());
+        if (notify) {
+            notifyQStile();
+        }
     }
 
     @Override

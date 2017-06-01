@@ -114,7 +114,12 @@ public class FingertouchService extends Service implements Handler.Callback {
             }
 */
             onReadyIdentify = false;
-            mHandler.sendEmptyMessageDelayed(MSG_AUTH, delay);
+
+            if (eventStatus == SpassFingerprint.STATUS_TIMEOUT_FAILED) {
+                mHandler.sendEmptyMessageDelayed(MSG_AUTH, 10);
+            } else {
+                mHandler.sendEmptyMessageDelayed(MSG_AUTH, delay);
+            }
         }
 
         @Override

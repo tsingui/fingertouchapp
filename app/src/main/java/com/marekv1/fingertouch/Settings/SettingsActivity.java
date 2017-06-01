@@ -50,7 +50,9 @@ public class SettingsActivity extends AppCompatActivity {
         spinner1.setOnItemSelectedListener(new CustomOnItemSelectedListener());
 
         try {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
         } catch (Exception ignored) {
         }
     }

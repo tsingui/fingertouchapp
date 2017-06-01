@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.marekv1.fingertouch")));
                 } catch (android.content.ActivityNotFoundException anfe) {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.marekv1.fingertouch")));
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.marekv1.fingertouchpro")));
                 }
                 dialog.cancel();
             }

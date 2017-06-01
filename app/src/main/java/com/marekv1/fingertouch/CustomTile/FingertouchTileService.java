@@ -10,7 +10,6 @@ import com.marekv1.fingertouch.FingertouchService;
 
 
 public class FingertouchTileService extends TileService {
-    private static final String PREFS_NAME = "fingertouchSettings";
     private SharedPreferences settings;
     private String status;
 
@@ -26,7 +25,7 @@ public class FingertouchTileService extends TileService {
         startService(updateStatus.setAction(Constants.ACTION.UPDATE_STATUS));
 
         if (settings == null) {
-            settings = this.getSharedPreferences(PREFS_NAME, 0);
+            settings = this.getSharedPreferences(Constants.PREFS.PREFS_NAME, 0);
         }
         status = settings.getString("serviceStatus", "unknown");
         int state;
@@ -46,7 +45,7 @@ public class FingertouchTileService extends TileService {
     @Override
     public void onStartListening() {
         if (settings == null) {
-            settings = this.getSharedPreferences(PREFS_NAME, 0);
+            settings = this.getSharedPreferences(Constants.PREFS.PREFS_NAME, 0);
         }
         status = settings.getString("serviceStatus", "unknown");
         int state;
@@ -72,7 +71,7 @@ public class FingertouchTileService extends TileService {
             startService(baseIntent);
 
             if (settings == null) {
-                settings = this.getSharedPreferences(PREFS_NAME, 0);
+                settings = this.getSharedPreferences(Constants.PREFS.PREFS_NAME, 0);
             }
             status = settings.getString("serviceStatus", "unknown");
             if (status.equals("running")) {

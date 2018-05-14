@@ -54,7 +54,7 @@ public class FingertouchService extends Service implements Handler.Callback {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (Intent.ACTION_SCREEN_ON.equals(action)) {
+            if (Intent.ACTION_USER_PRESENT.equals(action)) {
                 mHandler.removeCallbacksAndMessages(this);
                 long timeElapsed = (System.currentTimeMillis() - mSpassCreated) / 1000;
                 if (timeElapsed > 3600) { // re-initialize every hour
@@ -74,8 +74,9 @@ public class FingertouchService extends Service implements Handler.Callback {
 
     private void registerBroadcastReceiver() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_SCREEN_ON);
+        //filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_USER_PRESENT);
         mContext.registerReceiver(mPassReceiver, filter);
     }
 

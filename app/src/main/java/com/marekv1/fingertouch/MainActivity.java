@@ -94,16 +94,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
         builder.setMessage(getString(R.string.about_desc));
 
-        builder.setPositiveButton("GET PRO", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                try {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.marekv1.fingertouchpro")));
-                } catch (android.content.ActivityNotFoundException anfe) {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.marekv1.fingertouchpro")));
-                }
-                dialog.cancel();
-            }
-        });
+//        builder.setPositiveButton("GET PRO", new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface dialog, int id) {
+//                try {
+//                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.marekv1.fingertouchpro")));
+//                } catch (android.content.ActivityNotFoundException anfe) {
+//                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.marekv1.fingertouchpro")));
+//                }
+//                dialog.cancel();
+//            }
+//        });
+
+
 //        builder.setNegativeButton("No Thanks!", new DialogInterface.OnClickListener() {
 //            public void onClick(DialogInterface dialog, int id) {
 //                dialog.cancel();

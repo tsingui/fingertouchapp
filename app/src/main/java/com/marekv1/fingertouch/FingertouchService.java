@@ -1,5 +1,6 @@
 package com.marekv1.fingertouch;
 
+import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -27,6 +28,7 @@ public class FingertouchService extends Service implements Handler.Callback {
     private SharedPreferences settings;
 
     private PowerManager pm;
+    private KeyguardManager myKM;
     private SpassFingerprint mSpassFingerprint;
     private long mSpassCreated = 0;
     private Context mContext;
@@ -68,13 +70,19 @@ public class FingertouchService extends Service implements Handler.Callback {
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 mHandler.removeCallbacksAndMessages(this);
                 mHandler.sendEmptyMessageDelayed(MSG_PAUSE, 500);
+            } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                if( myKM.inKeyguardRestrictedInputMode() ) {
+                    // it is locked
+                } else {
+                    mHandler.sendEmptyMessageDelayed(MSG_RESUME, 500);
+                }
             }
         }
     };
 
     private void registerBroadcastReceiver() {
         IntentFilter filter = new IntentFilter();
-        //filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_USER_PRESENT);
         mContext.registerReceiver(mPassReceiver, filter);
@@ -368,6 +376,7 @@ public class FingertouchService extends Service implements Handler.Callback {
     private void startService() {
         mSpassCreated = System.currentTimeMillis();
         pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        myKM = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         //Get settings
         updateDelay();
 

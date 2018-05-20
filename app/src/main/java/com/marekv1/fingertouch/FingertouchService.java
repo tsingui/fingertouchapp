@@ -74,6 +74,7 @@ public class FingertouchService extends Service implements Handler.Callback {
                 if( myKM.inKeyguardRestrictedInputMode() ) {
                     // it is locked
                 } else {
+                    mHandler.removeCallbacksAndMessages(this);
                     mHandler.sendEmptyMessageDelayed(MSG_RESUME, 500);
                 }
             }
@@ -194,7 +195,7 @@ public class FingertouchService extends Service implements Handler.Callback {
                 pauseService(false);
                 break;
             case MSG_RESUME:
-                resumeService(false);
+                resumeService(true);
                 break;
         }
         return true;
